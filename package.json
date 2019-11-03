@@ -5,9 +5,6 @@
   "main": "dist/index.umd.js",
   "module": "dist/index.modern.mjs",
   "types": "dist/index.d.ts",
-  "publishConfig": {
-    "access": "restricted"
-  },
   "scripts": {
     "build": "microbundle src/index.ts -f modern,umd",
     "clean": "rm -rf dist .rts2_*",
