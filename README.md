@@ -1,22 +1,22 @@
-# AutoPeer
+# Perge
 
-AutoPeer is a minimal p2p synchronization system for [Automerge](https://github.com/automerge/automerge) documents using [PeerJS](https://github.com/peers/peerjs)
+Perge is a minimal p2p synchronization system for [Automerge](https://github.com/automerge/automerge) documents using [PeerJS](https://github.com/peers/peerjs).
 
 ![](screenshot.gif)
 
-- [AutoPeer](#autopeer)
+- [Perge](#perge)
   - [Installation](#installation)
   - [Quick Start](#quick-start)
   - [API](#api)
-    - [`AutoPeer`](#autopeer)
-      - [`constructor (actorId: string, config: AutoPeerConfig<T> = {})`](#constructor-actorid-string-config-autopeerconfigt)
-      - [`readonly set: Automerge.DocSet<T>;`](#readonly-set-automergedocsett)
+    - [`Perge`](#perge)
+      - [`constructor (actorId: string, config: PergeConfig<T> = {})`](#constructor-actorid-string-config-pergeconfigt)
+      - [`readonly docSet: Automerge.DocSet<T>;`](#readonly-docset-automergedocsett)
       - [`connect(id: string, conn?: PeerJS.DataConnection): void;`](#connectid-string-conn-peerjsdataconnection-void)
       - [`select (id: string): (fn: Function, ...args: any[]) => Automerge.Doc<T>`](#select-id-string-fn-function-args-any--automergedoct)
 
 ## Installation
 
-`AutoPeer` has the following dependencies:
+`Perge` has the following dependencies:
 ```json
 {
   "automerge": "^0.12.1",
@@ -24,13 +24,13 @@ AutoPeer is a minimal p2p synchronization system for [Automerge](https://github.
 }
 ```
 
-Install `AutoPeer` via npm:
+Install `Perge` via npm:
 ```sh
-npm install autopeer
+npm install perge
 ```
 or via yarn:
 ```sh
-yarn add autopeer
+yarn add perge
 ```
 
 ## Quick Start
@@ -39,21 +39,21 @@ For a more complete example, see [the example page](./example/index.html)
 
 ```js
 import { change } from 'automerge'
-import AutoPeer from 'autopeer'
+import Perge from 'perge'
 
 // instantiate library
-const autopeer = new AutoPeer('hella-long-unique-1')
+const perge = new Perge('hella-long-unique-1')
 
 // connect to a peer
-autopeer.connect('hella-long-unique-2')
+perge.connect('hella-long-unique-2')
 
-autopeer.docSet.registerHandler((docId, doc) => {
+perge.docSet.registerHandler((docId, doc) => {
   // logs 'some-document-id', { message: 'Hey!' }
   console.log(docId, doc)
 })
 
 // select and change documents
-autopeer.select('some-document-id')(
+perge.select('some-document-id')(
   change,
   doc => {
     doc.message = 'Hey!'
@@ -64,13 +64,13 @@ autopeer.select('some-document-id')(
 
 ## API
 
-### `AutoPeer`
+### `Perge`
 
-`AutoPeer` is a class containing references to `Automerge.Connections`, and encodes and decodes passed messages using `PeerJS` and the `Automerge.Connection` protocol.
+`Perge` is a class containing references to `Automerge.Connections`, and encodes and decodes passed messages using `PeerJS` and the `Automerge.Connection` protocol.
 
-#### `constructor (actorId: string, config: AutoPeerConfig<T> = {})`
+#### `constructor (actorId: string, config: PergeConfig<T> = {})`
 
-You can construct `AutoPeer` with the following config shape. All properties are optional.
+You can construct `Perge` with the following config shape. All properties are optional.
 
 |Key|Type|Description|
 |-|-|-|
@@ -80,7 +80,7 @@ You can construct `AutoPeer` with the following config shape. All properties are
 |`peerInstance`|`PeerJS.Peer`|A preconfigured `PeerJS.Peer` instance.|
 |`docSet`|`Automerge.DocSet<T>`|An instantiated `Automerge.DocSet` to sync between clients.|
 
-#### `readonly set: Automerge.DocSet<T>;`
+#### `readonly docSet: Automerge.DocSet<T>;`
 
 Getter that retrieves the sync'd `Automerge.DocSet`, handy to subscribe to state changes with:
 
@@ -102,7 +102,7 @@ Returns a function that applies a given `Automerge` doc method, then sets the re
 
 ```js
 // Selects the document with the ID 'foo'
-const exec = autopeer.select('foo')
+const exec = perge.select('foo')
 
 // Apply and broadcast changes on 'foo'
 const newDoc = exec(
@@ -120,5 +120,5 @@ const newDoc = Automerge.change(oldDoc, 'increase counter', doc => {
   if(!doc.counter) doc.counter = 0
   doc.counter++
 })
-autopeer.set.setDoc(id, newDoc)
+perge.set.setDoc(id, newDoc)
 ```

@@ -29,7 +29,7 @@
 
       const getDocId = () => docIdEl.value || 'default'
 
-      const AutoPeer = window.autopeer
+      const Perge = window.perge
 
       // Unique ID for this user
       const actorId = cuid()
@@ -41,8 +41,8 @@
       // Instantiate an Automerge.DocSet
       let docSet = new Automerge.DocSet()
 
-      // Instantiate AutoPeer library
-      const instance = new AutoPeer(actorId, {
+      // Instantiate Perge library
+      const instance = new Perge(actorId, {
         decode: JSON.parse, // msgpack or protobuf would also be a good option
         encode: JSON.stringify,
         peerInstance: peerInstance,

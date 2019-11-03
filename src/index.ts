@@ -1,14 +1,14 @@
 import Peer from 'peerjs'
 import * as Automerge from 'automerge'
 
-export interface AutoPeerConfig<T> {
+export interface PergeConfig<T> {
   decode?: (msg: string) => any
   encode?: (msg: any) => string
   peerInstance?: Peer
   docSet?: Automerge.DocSet<T>
 }
 
-export default class AutoPeer<T> {
+export default class Perge<T> {
   private _connections: {[id: string]: Automerge.Connection<T> } = {}
 
   private _actorId: string
@@ -17,7 +17,7 @@ export default class AutoPeer<T> {
   private _encode: (msg: any) => string
   private _decode: (msg: string) => any
 
-  constructor (actorId: string, config: AutoPeerConfig<T> = {}) {
+  constructor (actorId: string, config: PergeConfig<T> = {}) {
     this._actorId = actorId
     this._peerInstance = config.peerInstance || new Peer(this._actorId)
     this._docSet = config.docSet || new Automerge.DocSet()
