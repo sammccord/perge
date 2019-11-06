@@ -8,6 +8,8 @@ export interface PergeConfig<T> {
   docSet?: Automerge.DocSet<T>
 }
 
+type DocHandler<T> = (doc: Automerge.Doc<T>) => void
+
 export default class Perge<T> {
   private _connections: {[id: string]: Automerge.Connection<T> } = {}
 
@@ -53,6 +55,20 @@ export default class Perge<T> {
       const newDoc = fn(doc, ...args)
       this.docSet.setDoc(id, newDoc)
       return newDoc
+    }
+  }
+
+  public subscribe(idOrSetHandler: string | Automerge.DocSetHandler<T>, docHandler?: DocHandler<T>): () => void {
+    if (typeof idOrSetHandler === 'function') {
+      (this.docSet as any).handlers = (this.docSet as any).handlers.add(idOrSetHandler)
+      return () => (this.docSet as any).handlers = (this.docSet as any).handlers.delete(idOrSetHandler)
+    }
+    if(typeof idOrSetHandler === 'string') {
+      const handler = (docId, doc) => {
+        if(docId === idOrSetHandler) docHandler(doc)
+      }
+      (this.docSet as any).handlers = (this.docSet as any).handlers.add(handler)
+      return () => (this.docSet as any).handlers = (this.docSet as any).handlers.delete(handler)
     }
   }
 }

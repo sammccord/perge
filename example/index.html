@@ -50,8 +50,17 @@
       })
 
       // This handler gets invoked whenever the DocSet is updated, useful for re-rendering views.
-      docSet.registerHandler((docId, _doc) => {
+      instance.subscribe(() => {
         docs.innerText = JSON.stringify(docSet.docs, null ,2)
+      })
+
+      // subscribe returns an unsubscribe function
+      const unsubscribeFromFoo = instance.subscribe('foo', (doc) => {
+        console.log('foo', doc)
+        if(doc.counter === 10) {
+          unsubscribeFromFoo()
+          console.log('unsubscribed from foo!')
+        }
       })
 
       incrEl.onclick = () => {

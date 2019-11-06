@@ -1,6 +1,11 @@
 {
   "compilerOptions": {
     "target": "ESNext",
-    "allowSyntheticDefaultImports": true
-  }
+    "allowSyntheticDefaultImports": true,
+  },
+  "include": [
+    "node_modules/peerjs/index.d.ts",
+    "node_modules/automerge/@types/**/*.d.ts",
+    "src/**/*.ts"
+  ]
 }
