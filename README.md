@@ -13,6 +13,7 @@ Perge is a minimal p2p synchronization system for [Automerge](https://github.com
       - [`readonly docSet: Automerge.DocSet<T>;`](#readonly-docset-automergedocsett)
       - [`connect(id: string, conn?: PeerJS.DataConnection): void;`](#connectid-string-conn-peerjsdataconnection-void)
       - [`select (id: string): (fn: Function, ...args: any[]) => Automerge.Doc<T>`](#select-id-string-fn-function-args-any--automergedoct)
+      - [`subscribe(idOrSetHandler: string | Automerge.DocSetHandler<T>, docHandler?: DocHandler<T>): () => void`](#subscribeidorsethandler-string--automergedocsethandlert-dochandler-dochandlert---void)
 
 ## Installation
 
@@ -47,9 +48,18 @@ const perge = new Perge('hella-long-unique-1')
 // connect to a peer
 perge.connect('hella-long-unique-2')
 
-perge.docSet.registerHandler((docId, doc) => {
+// subscribe to all docset changes
+perge.subscribe((docId, doc) => {
   // logs 'some-document-id', { message: 'Hey!' }
   console.log(docId, doc)
+})
+
+// subscribe to a single doc's changes
+const unsubscribe = perge.subscribe('some-document-id', doc => {
+    // { message: 'Hey!' }
+  console.log(doc)
+  // unsubscribe this callback
+  unsubscribe()
 })
 
 // select and change documents
@@ -122,3 +132,7 @@ const newDoc = Automerge.change(oldDoc, 'increase counter', doc => {
 })
 perge.set.setDoc(id, newDoc)
 ```
+
+#### `subscribe(idOrSetHandler: string | Automerge.DocSetHandler<T>, docHandler?: DocHandler<T>): () => void`
+
+Subscribe to doc updates for either the entire docSet or a specific document ID. Returns a function that, when called, unsubscribes.
