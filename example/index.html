@@ -57,7 +57,7 @@
       // subscribe returns an unsubscribe function
       const unsubscribeFromFoo = instance.subscribe('foo', (doc) => {
         console.log('foo', doc)
-        if(doc.counter === 10) {
+        if(doc.counter.value === 10) {
           unsubscribeFromFoo()
           console.log('unsubscribed from foo!')
         }
@@ -70,8 +70,8 @@
           Automerge.change,
           'increase counter',
           doc => {
-            if(!doc.counter) doc.counter = 0
-            doc.counter++
+            if (!doc.counter) doc.counter = new Automerge.Counter()
+            else doc.counter.increment()
           }
         )
       }

@@ -43,10 +43,10 @@ import { change } from 'automerge'
 import Perge from 'perge'
 
 // instantiate library
-const perge = new Perge('hella-long-unique-1')
+const perge = new Perge('my-unique-id')
 
 // connect to a peer
-perge.connect('hella-long-unique-2')
+perge.connect('someone-elses-unique-id')
 
 // subscribe to all docset changes
 perge.subscribe((docId, doc) => {
@@ -85,8 +85,8 @@ You can construct `Perge` with the following config shape. All properties are op
 |Key|Type|Description|
 |-|-|-|
 |`actorId`|`string`|Unique ID used to initialize the PeerJS connection. Automerge should also be initialized with with this value.|
-|`decode`|`(msg: string) => any`|A function called on a WebRTC string message before it is passed to an `Automerge.Connection` with `receiveMsg`|
-|`encode`|`(msg: any) => string`|A function called on `Automerge.DocSet` change objects before it is sent to a peer.|
+|`decode`|`(msg: string) => any`|A function called on a WebRTC string message before it is passed to an `Automerge.Connection` with `receiveMsg`, defaults to `JSON.parse`|
+|`encode`|`(msg: any) => string`|A function called on `Automerge.DocSet` change objects before it is sent to a peer, defaults to `JSON.stringify`|
 |`peerInstance`|`PeerJS.Peer`|A preconfigured `PeerJS.Peer` instance.|
 |`docSet`|`Automerge.DocSet<T>`|An instantiated `Automerge.DocSet` to sync between clients.|
 
@@ -119,16 +119,16 @@ const newDoc = exec(
   Automerge.change,    // apply changes
   'increase counter',  // commit message
   doc => {             // mutate proxy document and apply changes
-    if(!doc.counter) doc.counter = 0
-    doc.counter++
+    if(!doc.counter) doc.counter = new Automerge.Counter()
+    else doc.counter.increment()
   }
 )
 
 // which is roughly the same as:
 const oldDoc = docSet.getDoc('foo') || Automerge.init(actorId)
 const newDoc = Automerge.change(oldDoc, 'increase counter', doc => {
-  if(!doc.counter) doc.counter = 0
-  doc.counter++
+  if(!doc.counter) doc.counter = new Automerge.Counter()
+  else doc.counter.increment()
 })
 perge.set.setDoc(id, newDoc)
 ```
