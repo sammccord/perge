@@ -11,6 +11,10 @@
     "dev": "microbundle watch",
     "prepublishOnly": "yarn clean && yarn build"
   },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/sammccord/perge.git"
+  },
   "dependencies": {
     "automerge": "^0.12.1",
     "peerjs": "^1.1.0"
