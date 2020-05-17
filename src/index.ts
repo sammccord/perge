@@ -11,7 +11,7 @@ export interface PergeConfig<T> {
 type DocHandler<T> = (doc: Automerge.Doc<T>) => void
 
 export default class Perge<T> {
-  private _connections: {[id: string]: Automerge.Connection<T> } = {}
+  private _connections: { [id: string]: Automerge.Connection<T> } = {}
 
   private _actorId: string
   private _docSet: Automerge.DocSet<T>
@@ -19,7 +19,7 @@ export default class Perge<T> {
   private _encode: (msg: any) => string
   private _decode: (msg: string) => any
 
-  constructor (actorId: string, config: PergeConfig<T> = {}) {
+  constructor(actorId: string, config: PergeConfig<T> = {}) {
     this._actorId = actorId
     this._peerInstance = config.peerInstance || new Peer(this._actorId)
     this._docSet = config.docSet || new Automerge.DocSet()
@@ -32,12 +32,13 @@ export default class Perge<T> {
     })
   }
 
-  public get docSet () {
+  public get docSet() {
     return this._docSet
   }
 
-  public connect (id: string, conn?: Peer.DataConnection): void {
+  public connect(id: string, conn?: Peer.DataConnection): void {
     if (this._connections[id]) return
+    console.log(id, conn)
     const peer = conn || this._peerInstance.connect(id)
     const connection = this._connections[id] = new Automerge.Connection(this._docSet, msg => {
       peer.send(this._encode(msg))
@@ -49,7 +50,7 @@ export default class Perge<T> {
     connection.open()
   }
 
-  public select (id: string): (fn: Function, ...args: any[]) => Automerge.Doc<T> {
+  public select(id: string): (fn: Function, ...args: any[]) => Automerge.Doc<T> {
     const doc = this.docSet.getDoc(id) || Automerge.init(this._actorId)
     return (fn: Function, ...args: any[]): Automerge.Doc<T> => {
       const newDoc = fn(doc, ...args)
@@ -60,15 +61,15 @@ export default class Perge<T> {
 
   public subscribe(idOrSetHandler: string | Automerge.DocSetHandler<T>, docHandler?: DocHandler<T>): () => void {
     if (typeof idOrSetHandler === 'function') {
-      (this.docSet as any).handlers = (this.docSet as any).handlers.add(idOrSetHandler)
-      return () => (this.docSet as any).handlers = (this.docSet as any).handlers.delete(idOrSetHandler)
+      this.docSet.registerHandler(idOrSetHandler)
+      return () => this.docSet.unregisterHandler(idOrSetHandler)
     }
-    if(typeof idOrSetHandler === 'string') {
-      const handler = (docId, doc) => {
-        if(docId === idOrSetHandler) docHandler(doc)
+    if (typeof idOrSetHandler === 'string') {
+      const handler = (docId: string, doc: Automerge.Doc<T>) => {
+        if (docId === idOrSetHandler) docHandler(doc)
       }
-      (this.docSet as any).handlers = (this.docSet as any).handlers.add(handler)
-      return () => (this.docSet as any).handlers = (this.docSet as any).handlers.delete(handler)
+      this.docSet.registerHandler(handler)
+      return () => this.docSet.unregisterHandler(handler)
     }
   }
 }

@@ -1,6 +1,7 @@
 {
   "compilerOptions": {
     "target": "ESNext",
+    "esModuleInterop": true,
     "allowSyntheticDefaultImports": true,
   },
   "include": [

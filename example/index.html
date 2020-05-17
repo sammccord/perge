@@ -1,90 +1,93 @@
 <html>
-  <head>
-    <script src="https://unpkg.com/automerge@0.12.1/dist/automerge.js"></script>
-    <script src="https://unpkg.com/peerjs@1.1.0/dist/peerjs.min.js"></script>
-    <script src="https://unpkg.com/cuid@2.1.6/dist/cuid.min.js"></script>
-  </head>
-  <body>
-    <h2>Automerge CRDT's synced with PeerJS</h2>
-    <hr />
-    <h4>Actor ID: <span id="actorId"></span></h4>
-    <form id='peerForm'>
-      <input name="peerId" placeholder="Peer ID" />
-      <button type="submit">Connect</button>
-      <br />
-      <pre id="peers" style="margin: 1em; padding:1em;">{}</pre>
-    </form>
-    <hr />
-    <input id="docId" placeholder="Document ID" />
-    <button id="increment">Increment</button>
-    <pre id="docs" style="margin: 1em; padding:1em;">{}</pre>
-    <script src="../dist/index.umd.js"></script>
-    <script>
-      const docs = document.getElementById('docs')
-      const actorEl = document.getElementById('actorId')
-      const incrEl = document.getElementById('increment')
-      const docIdEl = document.getElementById('docId')
-      const peerForm = document.getElementById('peerForm')
-      const peersEl = document.getElementById('peers')
 
-      const getDocId = () => docIdEl.value || 'default'
+<head>
+  <script src="https://unpkg.com/automerge@0.12.1/dist/automerge.js"></script>
+  <script src="https://unpkg.com/peerjs@1.1.0/dist/peerjs.min.js"></script>
+  <script src="https://unpkg.com/cuid@2.1.6/dist/cuid.min.js"></script>
+</head>
 
-      const Perge = window.perge
+<body>
+  <h2>Automerge CRDT's synced with PeerJS</h2>
+  <hr />
+  <h4>Actor ID: <span id="actorId"></span></h4>
+  <form id='peerForm'>
+    <input name="peerId" placeholder="Peer ID" />
+    <button type="submit">Connect</button>
+    <br />
+    <pre id="peers" style="margin: 1em; padding:1em;">{}</pre>
+  </form>
+  <hr />
+  <input id="docId" placeholder="Document ID" />
+  <button id="increment">Increment</button>
+  <pre id="docs" style="margin: 1em; padding:1em;">{}</pre>
+  <script src="../dist/index.umd.js"></script>
+  <script>
+    const docs = document.getElementById('docs')
+    const actorEl = document.getElementById('actorId')
+    const incrEl = document.getElementById('increment')
+    const docIdEl = document.getElementById('docId')
+    const peerForm = document.getElementById('peerForm')
+    const peersEl = document.getElementById('peers')
 
-      // Unique ID for this user
-      const actorId = cuid()
-      actorEl.innerText = actorId
+    const getDocId = () => docIdEl.value || 'default'
 
-      // Instantiate a PeerJS connection
-      const peerInstance = new Peer(actorId)
+    const Perge = window.perge
 
-      // Instantiate an Automerge.DocSet
-      let docSet = new Automerge.DocSet()
+    // Unique ID for this user
+    const actorId = cuid()
+    actorEl.innerText = actorId
 
-      // Instantiate Perge library
-      const instance = new Perge(actorId, {
-        decode: JSON.parse, // msgpack or protobuf would also be a good option
-        encode: JSON.stringify,
-        peerInstance: peerInstance,
-        docSet: docSet
-      })
+    // Instantiate a PeerJS connection
+    const peerInstance = new Peer(actorId)
 
-      // This handler gets invoked whenever the DocSet is updated, useful for re-rendering views.
-      instance.subscribe(() => {
-        docs.innerText = JSON.stringify(docSet.docs, null ,2)
-      })
+    // Instantiate an Automerge.DocSet
+    let docSet = new Automerge.DocSet()
 
-      // subscribe returns an unsubscribe function
-      const unsubscribeFromFoo = instance.subscribe('foo', (doc) => {
-        console.log('foo', doc)
-        if(doc.counter.value === 10) {
-          unsubscribeFromFoo()
-          console.log('unsubscribed from foo!')
+    // Instantiate Perge library
+    const instance = new Perge(actorId, {
+      decode: JSON.parse, // msgpack or protobuf would also be a good option
+      encode: JSON.stringify,
+      peerInstance: peerInstance,
+      docSet: docSet
+    })
+
+    // This handler gets invoked whenever the DocSet is updated, useful for re-rendering views.
+    instance.subscribe(() => {
+      docs.innerText = JSON.stringify(docSet.docs, null, 2)
+    })
+
+    // subscribe returns an unsubscribe function
+    const unsubscribeFromFoo = instance.subscribe('foo', (doc) => {
+      console.log('foo', doc)
+      if (doc.counter.value === 10) {
+        unsubscribeFromFoo()
+        console.log('unsubscribed from foo!')
+      }
+    })
+
+    incrEl.onclick = () => {
+      const id = getDocId()
+      // Update the document
+      const doc = instance.select(id)(
+        Automerge.change,
+        'increase counter',
+        doc => {
+          if (!doc.counter) doc.counter = new Automerge.Counter()
+          else doc.counter.increment()
         }
-      })
+      )
+    }
 
-      incrEl.onclick = () => {
-        const id = getDocId()
-        // Update the document
-        const doc = instance.select(id)(
-          Automerge.change,
-          'increase counter',
-          doc => {
-            if (!doc.counter) doc.counter = new Automerge.Counter()
-            else doc.counter.increment()
-          }
-        )
-      }
-
-      peerForm.onsubmit = (e) => {
-        e.preventDefault()
-        const formData = new FormData(peerForm)
-        const peerId = formData.get('peerId')
-        instance.connect(peerId, peerInstance.connect(peerId))
-        peersEl.innerText = JSON.stringify(
-          Array.from(peerInstance._connections.keys()
+    peerForm.onsubmit = (e) => {
+      e.preventDefault()
+      const formData = new FormData(peerForm)
+      const peerId = formData.get('peerId')
+      instance.connect(peerId, peerInstance.connect(peerId))
+      peersEl.innerText = JSON.stringify(
+        Array.from(peerInstance._connections.keys()
         ), null, 2)
-      }
-    </script>
-  </body>
+    }
+  </script>
+</body>
+
 </html>

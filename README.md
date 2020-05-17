@@ -20,8 +20,8 @@ Perge is a minimal p2p synchronization system for [Automerge](https://github.com
 `Perge` has the following dependencies:
 ```json
 {
-  "automerge": "^0.12.1",
-  "peerjs": "^1.1.0"
+  "automerge": "^0.14.0",
+  "peerjs": "^1.2.0"
 }
 ```
 
@@ -82,13 +82,13 @@ perge.select('some-document-id')(
 
 You can construct `Perge` with the following config shape. All properties are optional.
 
-|Key|Type|Description|
-|-|-|-|
-|`actorId`|`string`|Unique ID used to initialize the PeerJS connection. Automerge should also be initialized with with this value.|
-|`decode`|`(msg: string) => any`|A function called on a WebRTC string message before it is passed to an `Automerge.Connection` with `receiveMsg`, defaults to `JSON.parse`|
-|`encode`|`(msg: any) => string`|A function called on `Automerge.DocSet` change objects before it is sent to a peer, defaults to `JSON.stringify`|
-|`peerInstance`|`PeerJS.Peer`|A preconfigured `PeerJS.Peer` instance.|
-|`docSet`|`Automerge.DocSet<T>`|An instantiated `Automerge.DocSet` to sync between clients.|
+| Key            | Type                   | Description                                                                                                                               |
+| -------------- | ---------------------- | ----------------------------------------------------------------------------------------------------------------------------------------- |
+| `actorId`      | `string`               | Unique ID used to initialize the PeerJS connection. Automerge should also be initialized with with this value.                            |
+| `decode`       | `(msg: string) => any` | A function called on a WebRTC string message before it is passed to an `Automerge.Connection` with `receiveMsg`, defaults to `JSON.parse` |
+| `encode`       | `(msg: any) => string` | A function called on `Automerge.DocSet` change objects before it is sent to a peer, defaults to `JSON.stringify`                          |
+| `peerInstance` | `PeerJS.Peer`          | A preconfigured `PeerJS.Peer` instance.                                                                                                   |
+| `docSet`       | `Automerge.DocSet<T>`  | An instantiated `Automerge.DocSet` to sync between clients.                                                                               |
 
 #### `readonly docSet: Automerge.DocSet<T>;`
 
