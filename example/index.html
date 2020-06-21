@@ -1,7 +1,7 @@
 <html>
 
 <head>
-  <script src="https://unpkg.com/automerge@0.12.1/dist/automerge.js"></script>
+  <script src="https://unpkg.com/automerge@0.14.1/dist/automerge.js"></script>
   <script src="https://unpkg.com/peerjs@1.1.0/dist/peerjs.min.js"></script>
   <script src="https://unpkg.com/cuid@2.1.6/dist/cuid.min.js"></script>
 </head>
@@ -38,7 +38,7 @@
     actorEl.innerText = actorId
 
     // Instantiate a PeerJS connection
-    const peerInstance = new Peer(actorId)
+    const peer = new Peer(actorId)
 
     // Instantiate an Automerge.DocSet
     let docSet = new Automerge.DocSet()
@@ -47,7 +47,7 @@
     const instance = new Perge(actorId, {
       decode: JSON.parse, // msgpack or protobuf would also be a good option
       encode: JSON.stringify,
-      peerInstance: peerInstance,
+      peer: peer,
       docSet: docSet
     })
 
@@ -82,9 +82,9 @@
       e.preventDefault()
       const formData = new FormData(peerForm)
       const peerId = formData.get('peerId')
-      instance.connect(peerId, peerInstance.connect(peerId))
+      instance.connect(peerId, peer.connect(peerId))
       peersEl.innerText = JSON.stringify(
-        Array.from(peerInstance._connections.keys()
+        Array.from(peer._connections.keys()
         ), null, 2)
     }
   </script>

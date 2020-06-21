@@ -8,19 +8,20 @@ Perge is a minimal p2p synchronization system for [Automerge](https://github.com
   - [Installation](#installation)
   - [Quick Start](#quick-start)
   - [API](#api)
-    - [`Perge`](#perge)
-      - [`constructor (actorId: string, config: PergeConfig<T> = {})`](#constructor-actorid-string-config-pergeconfigt)
-      - [`readonly docSet: Automerge.DocSet<T>;`](#readonly-docset-automergedocsett)
-      - [`connect(id: string, conn?: PeerJS.DataConnection): void;`](#connectid-string-conn-peerjsdataconnection-void)
-      - [`select (id: string): (fn: Function, ...args: any[]) => Automerge.Doc<T>`](#select-id-string-fn-function-args-any--automergedoct)
-      - [`subscribe(idOrSetHandler: string | Automerge.DocSetHandler<T>, docHandler?: DocHandler<T>): () => void`](#subscribeidorsethandler-string--automergedocsethandlert-dochandler-dochandlert---void)
+    - [`Perge`](#perge-1)
+      - [`constructor (actorId: string, config: PergeConfig = {})`](#constructor-actorid-string-config-pergeconfig--)
+      - [`readonly docSet: Automerge.DocSet<any>;`](#readonly-docset-automergedocsetany)
+      - [`readonly peer: Peer`](#readonly-peer-peer)
+      - [`connect(id: string, conn?: PeerJS.DataConnection): Peer.DataConnection;`](#connectid-string-conn-peerjsdataconnection-peerdataconnection)
+      - [`select<T>(id: string): (fn: Function, ...args: any[]) => Automerge.Doc<T>`](#selecttid-string-fn-function-args-any--automergedoct)
+      - [`subscribe<T>(idOrSetHandler: string | Automerge.DocSetHandler<T>, callback?: Automerge.ChangeFn<T>): () => void`](#subscribetidorsethandler-string--automergedocsethandlert-callback-automergechangefnt---void)
 
 ## Installation
 
 `Perge` has the following dependencies:
 ```json
 {
-  "automerge": "^0.14.0",
+  "automerge": "^0.14.1",
   "peerjs": "^1.2.0"
 }
 ```
@@ -78,21 +79,23 @@ perge.select('some-document-id')(
 
 `Perge` is a class containing references to `Automerge.Connections`, and encodes and decodes passed messages using `PeerJS` and the `Automerge.Connection` protocol.
 
-#### `constructor (actorId: string, config: PergeConfig<T> = {})`
+#### `constructor (actorId: string, config: PergeConfig = {})`
 
-You can construct `Perge` with the following config shape. All properties are optional.
+| `actorId` | `string`               | Required. A unique ID used to initialize the PeerJS connection. Automerge should also be initialized with with this value.  
 
-| Key            | Type                   | Description                                                                                                                               |
-| -------------- | ---------------------- | ----------------------------------------------------------------------------------------------------------------------------------------- |
-| `actorId`      | `string`               | Unique ID used to initialize the PeerJS connection. Automerge should also be initialized with with this value.                            |
-| `decode`       | `(msg: string) => any` | A function called on a WebRTC string message before it is passed to an `Automerge.Connection` with `receiveMsg`, defaults to `JSON.parse` |
-| `encode`       | `(msg: any) => string` | A function called on `Automerge.DocSet` change objects before it is sent to a peer, defaults to `JSON.stringify`                          |
-| `peerInstance` | `PeerJS.Peer`          | A preconfigured `PeerJS.Peer` instance.                                                                                                   |
-| `docSet`       | `Automerge.DocSet<T>`  | An instantiated `Automerge.DocSet` to sync between clients.                                                                               |
+You can further configure `Perge` with the following config shape. All properties are optional.
 
-#### `readonly docSet: Automerge.DocSet<T>;`
+| Key      | Type                   | Description                                                                                                                               |
+| -------- | ---------------------- | ----------------------------------------------------------------------------------------------------------------------------------------- |
+| `decode` | `(msg: string) => any` | A function called on a WebRTC string message before it is passed to an `Automerge.Connection` with `receiveMsg`, defaults to `JSON.parse` |
+| `encode` | `(msg: any) => string` | A function called on `Automerge.DocSet` change objects before it is sent to a peer, defaults to `JSON.stringify`                          |
+| `peer`   | `PeerJS.Peer`          | A preconfigured `PeerJS.Peer` instance.                                                                                                   |
+| `docSet` | `Automerge.DocSet<T>`  | An instantiated `Automerge.DocSet` to sync between clients.                                                                               |
 
-Getter that retrieves the sync'd `Automerge.DocSet`, handy to subscribe to state changes with:
+
+#### `readonly docSet: Automerge.DocSet<any>;`
+
+A reference to the synchronized `Automerge.DocSet`, handy to subscribe to state changes with if you don't want to use `Perge.subscribe`:
 
 ```js
   docSet.registerHandler((docId, doc) => {
@@ -100,15 +103,29 @@ Getter that retrieves the sync'd `Automerge.DocSet`, handy to subscribe to state
   })
 ```
 
-#### `connect(id: string, conn?: PeerJS.DataConnection): void;`
+#### `readonly peer: Peer`
+
+A reference to the underlying PeerJS instance, useful for registering lifecycle handlers.
+
+```js
+perge.peer.on('error', (err) => {
+  // handle
+})
+```
+
+#### `connect(id: string, conn?: PeerJS.DataConnection): Peer.DataConnection;`
 
 Connects to a `PeerJS` peer with the given ID and sends outgoing `Automerge.DocSet` syncronization messages using the `Automerge.Connection` protocol.
 
+Returns 
+
 Optionally, you can pass an existing `PeerJS` connection.
 
-#### `select (id: string): (fn: Function, ...args: any[]) => Automerge.Doc<T>`
+#### `select<T>(id: string): (fn: Function, ...args: any[]) => Automerge.Doc<T>`
 
-Returns a function that applies a given `Automerge` doc method, then sets the returned document on the internal `DocSet` to broadcast changes to connected peers, for example:
+- [Updating Automerge Documents](https://github.com/automerge/automerge#updating-a-document)
+
+Returns a function that applies a given `Automerge` document change method, then sets the returned document on the internal `DocSet` to broadcast changes to connected peers, for example:
 
 ```js
 // Selects the document with the ID 'foo'
@@ -133,6 +150,22 @@ const newDoc = Automerge.change(oldDoc, 'increase counter', doc => {
 perge.set.setDoc(id, newDoc)
 ```
 
-#### `subscribe(idOrSetHandler: string | Automerge.DocSetHandler<T>, docHandler?: DocHandler<T>): () => void`
+#### `subscribe<T>(idOrSetHandler: string | Automerge.DocSetHandler<T>, callback?: Automerge.ChangeFn<T>): () => void`
 
 Subscribe to doc updates for either the entire docSet or a specific document ID. Returns a function that, when called, unsubscribes.
+
+```js
+
+const unsubscribeFromAll = instance.subscribe((id, doc) => {
+  // do something with the updated doc
+})
+
+// subscribe returns an unsubscribe function
+const unsubscribeFromFoo = instance.subscribe('foo', (doc) => {
+  console.log('foo', doc)
+  if (doc.counter.value === 10) {
+    unsubscribeFromFoo()
+    console.log('unsubscribed from foo!')
+  }
+})
+```

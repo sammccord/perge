@@ -1,23 +1,20 @@
 import Peer from 'peerjs';
 import * as Automerge from 'automerge';
-export interface PergeConfig<T> {
+export interface PergeConfig {
     decode?: (msg: string) => any;
     encode?: (msg: any) => string;
-    peerInstance?: Peer;
-    docSet?: Automerge.DocSet<T>;
+    peer?: Peer;
+    docSet?: Automerge.DocSet<any>;
 }
-declare type DocHandler<T> = (doc: Automerge.Doc<T>) => void;
-export default class Perge<T> {
+export default class Perge {
+    readonly peer: Peer;
+    readonly docSet: Automerge.DocSet<any>;
     private _connections;
     private _actorId;
-    private _docSet;
-    private _peerInstance;
     private _encode;
     private _decode;
-    constructor(actorId: string, config?: PergeConfig<T>);
-    get docSet(): Automerge.DocSet<T>;
-    connect(id: string, conn?: Peer.DataConnection): void;
-    select(id: string): (fn: Function, ...args: any[]) => Automerge.Doc<T>;
-    subscribe(idOrSetHandler: string | Automerge.DocSetHandler<T>, docHandler?: DocHandler<T>): () => void;
+    constructor(actorId: string, config?: PergeConfig);
+    connect(id: string, conn?: Peer.DataConnection): Peer.DataConnection;
+    select<T>(id: string): (fn: Function, ...args: any[]) => Automerge.Doc<T>;
+    subscribe<T>(idOrSetHandler: string | Automerge.DocSetHandler<T>, callback?: Automerge.ChangeFn<T>): () => void;
 }
-export {};
