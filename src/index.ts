@@ -1,18 +1,20 @@
 import Peer from 'peerjs'
-import * as Automerge from 'automerge'
+import { init, Connection, DocSet, Doc, ChangeFn, DocSetHandler, change, undo, redo } from 'automerge'
+
+type AutomergeUpdateMethod = typeof change | typeof undo | typeof redo
 
 export interface PergeConfig {
   decode?: (msg: string) => any
   encode?: (msg: any) => string
   peer?: Peer
-  docSet?: Automerge.DocSet<any>
+  docSet?: DocSet<any>
 }
 
 export default class Perge {
   readonly peer: Peer
-  readonly docSet: Automerge.DocSet<any>
+  readonly docSet: DocSet<any>
 
-  private _connections: { [id: string]: Automerge.Connection<any> } = {}
+  private _connections: { [id: string]: Connection<any> } = {}
   private _actorId: string
   private _encode: (msg: any) => string
   private _decode: (msg: string) => any
@@ -20,7 +22,7 @@ export default class Perge {
   constructor(actorId: string, config: PergeConfig = {}) {
     this._actorId = actorId
     this.peer = config.peer || new Peer(this._actorId)
-    this.docSet = config.docSet || new Automerge.DocSet()
+    this.docSet = config.docSet || new DocSet()
     this._encode = config.encode || JSON.stringify
     this._decode = config.decode || JSON.parse
     this.peer.on('connection', conn => {
@@ -33,7 +35,7 @@ export default class Perge {
   public connect(id: string, conn?: Peer.DataConnection): Peer.DataConnection {
     if (this._connections[id]) return this.peer.connections[id]
     const peer = conn || this.peer.connect(id)
-    const connection = this._connections[id] = new Automerge.Connection(this.docSet, msg => {
+    const connection = this._connections[id] = new Connection(this.docSet, msg => {
       peer.send(this._encode(msg))
     })
     peer.on('disconnected', () => {
@@ -44,16 +46,19 @@ export default class Perge {
     return peer
   }
 
-  public select<T>(id: string): (fn: Function, ...args: any[]) => Automerge.Doc<T> {
-    const doc = this.docSet.getDoc(id) || Automerge.init(this._actorId)
-    return (fn: Function, ...args: any[]): Automerge.Doc<T> => {
-      const newDoc = fn(doc, ...args)
+  public get<T>(id: string): Doc<T> {
+    return this.docSet.getDoc(id) || init(this._actorId)
+  }
+
+  public select<T>(id: string): (changeMethod: AutomergeUpdateMethod, ...args: any[]) => Doc<T> {
+    return (changeMethod: Function, ...args: any[]): Doc<T> => {
+      const newDoc = changeMethod(this.get(id), ...args)
       this.docSet.setDoc(id, newDoc)
       return newDoc
     }
   }
 
-  public subscribe<T>(idOrSetHandler: string | Automerge.DocSetHandler<T>, callback?: Automerge.ChangeFn<T>): () => void {
+  public subscribe<T>(idOrSetHandler: string | DocSetHandler<T>, callback?: ChangeFn<T>): () => void {
     if (typeof idOrSetHandler === 'function') {
       this.docSet.registerHandler(idOrSetHandler)
       return () => this.docSet.unregisterHandler(idOrSetHandler)

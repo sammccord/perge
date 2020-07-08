@@ -13,6 +13,7 @@ Perge is a minimal p2p synchronization system for [Automerge](https://github.com
       - [`readonly docSet: Automerge.DocSet<any>;`](#readonly-docset-automergedocsetany)
       - [`readonly peer: Peer`](#readonly-peer-peer)
       - [`connect(id: string, conn?: PeerJS.DataConnection): Peer.DataConnection;`](#connectid-string-conn-peerjsdataconnection-peerdataconnection)
+      - [`get<T>(id: string): Doc<T>`](#gettid-string-doct)
       - [`select<T>(id: string): (fn: Function, ...args: any[]) => Automerge.Doc<T>`](#selecttid-string-fn-function-args-any--automergedoct)
       - [`subscribe<T>(idOrSetHandler: string | Automerge.DocSetHandler<T>, callback?: Automerge.ChangeFn<T>): () => void`](#subscribetidorsethandler-string--automergedocsethandlert-callback-automergechangefnt---void)
 
@@ -37,7 +38,9 @@ yarn add perge
 
 ## Quick Start
 
-For a more complete example, see [the example page](./example/index.html)
+For a more complete example, see [the example page](./example/index.html).
+
+You can run the example with `yarn dev:example` which uses [Parcel](https://parceljs.org/getting_started.html)
 
 ```js
 import { change } from 'automerge'
@@ -117,9 +120,13 @@ perge.peer.on('error', (err) => {
 
 Connects to a `PeerJS` peer with the given ID and sends outgoing `Automerge.DocSet` syncronization messages using the `Automerge.Connection` protocol.
 
-Returns 
+Returns the DataConnection so you can register your own lifecycle callbacks.
 
 Optionally, you can pass an existing `PeerJS` connection.
+
+#### `get<T>(id: string): Doc<T>`
+
+Gets an existing doc with given ID, or initializes a new doc with the client's actor ID.
 
 #### `select<T>(id: string): (fn: Function, ...args: any[]) => Automerge.Doc<T>`
 

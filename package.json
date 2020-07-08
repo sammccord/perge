@@ -1,6 +1,6 @@
 {
   "name": "perge",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "license": "MIT",
   "types": "dist/index.d.ts",
   "main": "dist/index.js",
@@ -16,8 +16,9 @@
   ],
   "scripts": {
     "build": "microbundle src/index.ts",
-    "clean": "rm -rf dist .rts2_*",
+    "clean": "rm -rf dist .cache",
     "dev": "microbundle watch",
+    "dev:example": "parcel example/index.html",
     "prepublishOnly": "yarn clean && yarn build"
   },
   "author": "Sam McCord <sam.mccord@protonmail.com>",
