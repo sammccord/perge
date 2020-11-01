@@ -26,7 +26,7 @@ export default class Perge {
     this._encode = config.encode || JSON.stringify
     this._decode = config.decode || JSON.parse
     this.peer.on('connection', conn => {
-      if(!this._connections[conn.peer]) this.connect(conn.peer)
+      if(!this._connections[conn.peer]) this.connect(conn.peer, conn)
       conn.on('data', msg => {
         this._connections[conn.peer].receiveMsg(this._decode(msg))
       })
