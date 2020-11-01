@@ -39,10 +39,14 @@ export default class Perge {
     const connection = this._connections[id] = new Connection(this.docSet, msg => {
       peer.send(this._encode(msg))
     })
-    peer.on('disconnected', () => {
-      connection.close()
-      delete this._connections[id]
-    })
+    const cleanup = () => {
+      if(this._connections[id]) {
+        delete this._connections[id]
+        connection.close()
+      }
+    }
+    peer.on('close', cleanup)
+    peer.on('error', cleanup)
     connection.open()
     return peer
   }
