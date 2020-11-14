@@ -116,13 +116,15 @@ perge.peer.on('error', (err) => {
 })
 ```
 
-#### `connect(id: string, conn?: PeerJS.DataConnection): Peer.DataConnection;`
+#### `connect(id: string, conn?: Peer.DataConnection, options?: Peer.PeerConnectOption): Peer.DataConnection`
 
 Connects to a `PeerJS` peer with the given ID and sends outgoing `Automerge.DocSet` syncronization messages using the `Automerge.Connection` protocol.
 
 Returns the DataConnection so you can register your own lifecycle callbacks.
 
 Optionally, you can pass an existing `PeerJS` connection.
+
+If you don't pass an existing `PeerJS` connection, it will connect using the given options, if any.
 
 #### `get<T>(id: string): Doc<T>`
 

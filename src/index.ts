@@ -33,9 +33,9 @@ export default class Perge {
     })
   }
 
-  public connect(id: string, conn?: Peer.DataConnection): Peer.DataConnection {
+  public connect(id: string, conn?: Peer.DataConnection, options?: Peer.PeerConnectOption): Peer.DataConnection {
     if (this._connections[id]) return this.peer.connections[id]
-    const peer = conn || this.peer.connect(id)
+    const peer = conn || this.peer.connect(id, options)
     const connection = this._connections[id] = new Connection(this.docSet, msg => {
       peer.send(this._encode(msg))
     })

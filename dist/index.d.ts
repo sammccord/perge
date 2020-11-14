@@ -15,7 +15,7 @@ export default class Perge {
     private _encode;
     private _decode;
     constructor(actorId: string, config?: PergeConfig);
-    connect(id: string, conn?: Peer.DataConnection): Peer.DataConnection;
+    connect(id: string, conn?: Peer.DataConnection, options?: Peer.PeerConnectOption): Peer.DataConnection;
     get<T>(id: string): Doc<T>;
     select<T>(id: string): (changeMethod: AutomergeUpdateMethod, ...args: any[]) => Doc<T>;
     subscribe<T>(idOrSetHandler: string | DocSetHandler<T>, callback?: ChangeFn<T>): () => void;
