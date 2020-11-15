@@ -12,7 +12,7 @@ Perge is a minimal p2p synchronization system for [Automerge](https://github.com
       - [`constructor (actorId: string, config: PergeConfig = {})`](#constructor-actorid-string-config-pergeconfig--)
       - [`readonly docSet: Automerge.DocSet<any>;`](#readonly-docset-automergedocsetany)
       - [`readonly peer: Peer`](#readonly-peer-peer)
-      - [`connect(id: string, conn?: PeerJS.DataConnection): Peer.DataConnection;`](#connectid-string-conn-peerjsdataconnection-peerdataconnection)
+      - [`connect(id: string, conn?: Peer.DataConnection, options?: Peer.PeerConnectOption): Peer.DataConnection`](#connectid-string-conn-peerdataconnection-options-peerpeerconnectoption-peerdataconnection)
       - [`get<T>(id: string): Doc<T>`](#gettid-string-doct)
       - [`select<T>(id: string): (fn: Function, ...args: any[]) => Automerge.Doc<T>`](#selecttid-string-fn-function-args-any--automergedoct)
       - [`subscribe<T>(idOrSetHandler: string | Automerge.DocSetHandler<T>, callback?: Automerge.ChangeFn<T>): () => void`](#subscribetidorsethandler-string--automergedocsethandlert-callback-automergechangefnt---void)

@@ -1,5 +1,5 @@
-import Peer from 'peerjs';
-import { DocSet, Doc, ChangeFn, DocSetHandler, change, undo, redo } from 'automerge';
+import Peer from "peerjs";
+import { DocSet, Doc, ChangeFn, DocSetHandler, change, undo, redo } from "automerge";
 declare type AutomergeUpdateMethod = typeof change | typeof undo | typeof redo;
 export interface PergeConfig {
     decode?: (msg: string) => any;
